@@ -8,10 +8,11 @@
   padding: 0;
 }
 
-html {
+html, body {
   background: #000;
   color: #fff;
-  scroll-behavior: smooth;
+  overflow: hidden;
+  height: 100%;
 }
 
 ::selection {
@@ -19,20 +20,27 @@ html {
   color: #000;
 }
 
-/* Masonry grid via CSS columns */
-.masonry {
-  columns: 3 280px;
-  column-gap: 2px;
+/* Magazine horizontal scroll container */
+.magazine {
+  display: flex;
+  width: 100vw;
+  height: 100dvh;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
-.masonry-item {
-  break-inside: avoid;
-  margin-bottom: 2px;
-  display: block;
+.magazine::-webkit-scrollbar {
+  display: none;
 }
 
-@media (max-width: 640px) {
-  .masonry {
-    columns: 2 160px;
-  }
+/* Each spread fills the viewport */
+.spread {
+  min-width: 100vw;
+  height: 100dvh;
+  scroll-snap-align: start;
+  flex-shrink: 0;
+  position: relative;
 }
