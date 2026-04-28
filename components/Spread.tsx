@@ -36,7 +36,7 @@ export default function Spread({ artwork, index, total, flipped }: Props) {
   );
 
   const TextPanel = (
-    <div className="flex flex-col justify-center px-8 md:px-14 py-12 border-t border-white/5 md:border-t-0 min-h-0">
+    <div className="flex flex-col justify-center px-6 md:px-10 py-10 border-t border-white/5 md:border-t-0 min-h-0 overflow-y-auto">
       {/* Large faint number */}
       <span className="font-serif text-7xl md:text-9xl leading-none text-white/5 mb-4 select-none">
         {num}
@@ -56,19 +56,22 @@ export default function Spread({ artwork, index, total, flipped }: Props) {
       </p>
 
       {/* Description */}
-      <p className="text-white/60 text-sm leading-relaxed font-sans max-w-xs">
+      <p className="text-white/60 text-sm leading-relaxed font-sans max-w-sm">
         {artwork.description}
       </p>
     </div>
   );
 
+  // Generative art gets a narrower media panel so text always fits
+  const cols = artwork.type === "generative"
+    ? (flipped ? "45fr 55fr" : "55fr 45fr")
+    : (flipped ? "38fr 62fr" : "62fr 38fr");
+
   return (
     <div className="spread bg-black">
       <div
         className="h-full flex flex-col md:grid pt-16"
-        style={{
-          gridTemplateColumns: flipped ? "38fr 62fr" : "62fr 38fr",
-        }}
+        style={{ gridTemplateColumns: cols }}
       >
         {flipped ? (
           <>
