@@ -1,4 +1,5 @@
 export type Category = "digital" | "painting" | "photography" | "illustration" | "mixed";
+export type ArtType  = "digital" | "static";
 
 export interface Artwork {
   id: string;
@@ -6,6 +7,7 @@ export interface Artwork {
   medium: string;
   year: number;
   category: Category;
+  type: ArtType;   // "digital" → Digital Art tab | "static" → Static Art tab
   image: string;
   description: string;
 }
@@ -23,6 +25,7 @@ export const artworks: Artwork[] = [
     medium: "Digital",
     year: 2024,
     category: "digital",
+    type: "digital",
     image: "https://picsum.photos/seed/nd1/700/900",
     description:
       "An exploration of empty space as a subject rather than a background. The work asks what remains when everything recognisable is stripped away — and whether that remainder is nothing, or everything.",
@@ -33,6 +36,7 @@ export const artworks: Artwork[] = [
     medium: "Oil on canvas",
     year: 2023,
     category: "painting",
+    type: "static",
     image: "https://picsum.photos/seed/nd2/900/600",
     description:
       "Painted across three sittings without cleaning the brush between sessions. Each layer carries the residue of the last — a record of time passing, of decisions made and unmade.",
@@ -43,6 +47,7 @@ export const artworks: Artwork[] = [
     medium: "Photography",
     year: 2024,
     category: "photography",
+    type: "static",
     image: "https://picsum.photos/seed/nd3/600/900",
     description:
       "Taken at 4am in an empty parking structure. The fluorescent light had been flickering for months. This image captures the exact moment it chose to hold still.",
@@ -53,6 +58,7 @@ export const artworks: Artwork[] = [
     medium: "Digital",
     year: 2024,
     category: "digital",
+    type: "digital",
     image: "https://picsum.photos/seed/nd4/900/700",
     description:
       "Structure failing gradually, then all at once. The composition mirrors how we experience breaking points — invisible until they are undeniable.",
@@ -63,6 +69,7 @@ export const artworks: Artwork[] = [
     medium: "Mixed media",
     year: 2023,
     category: "mixed",
+    type: "static",
     image: "https://picsum.photos/seed/nd5/700/1000",
     description:
       "Wax, ink, and heat on paper. The surface behaves like skin — absorbing, repelling, scarring. Made during a period of thinking about thresholds and what it means to be permeable.",
@@ -73,6 +80,7 @@ export const artworks: Artwork[] = [
     medium: "Illustration",
     year: 2024,
     category: "illustration",
+    type: "digital",
     image: "https://picsum.photos/seed/nd6/800/800",
     description:
       "The second in a series about interference patterns. Where two signals meet and cancel each other out, something new — neither of them — briefly exists.",
@@ -83,6 +91,7 @@ export const artworks: Artwork[] = [
     medium: "Photography",
     year: 2023,
     category: "photography",
+    type: "static",
     image: "https://picsum.photos/seed/nd7/1000/650",
     description:
       "Shot from a moving car on a road I didn't know. Everything is slightly wrong — the angle, the exposure, the moment. That wrongness is the point.",
@@ -93,6 +102,7 @@ export const artworks: Artwork[] = [
     medium: "Digital",
     year: 2024,
     category: "digital",
+    type: "digital",
     image: "https://picsum.photos/seed/nd8/650/900",
     description:
       "A form repeated until it loses meaning, then gains a different one. Repetition as transformation. The ninth iteration looks nothing like the first.",
@@ -103,6 +113,7 @@ export const artworks: Artwork[] = [
     medium: "Oil on canvas",
     year: 2022,
     category: "painting",
+    type: "static",
     image: "https://picsum.photos/seed/nd9/1000/720",
     description:
       "What is left after the subject leaves the room. This painting began as a portrait and became something else entirely — a study in what presence leaves behind.",

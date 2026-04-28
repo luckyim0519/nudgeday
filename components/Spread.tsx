@@ -53,17 +53,10 @@ export default function Spread({ artwork, index, total, flipped }: Props) {
 
   return (
     <div className="spread bg-black">
-      {/* Top bar */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-8 py-6">
-        <span className="font-serif text-xs tracking-[0.25em] text-white/40">NUDGEDAY</span>
-        <span className="font-sans text-xs tracking-widest text-white/20">
-          {num} / {tot}
-        </span>
-      </div>
-
       {/* Content — stacked on mobile, side by side on desktop */}
+      {/* pt-16 clears the fixed global nav bar */}
       <div
-        className="h-full flex flex-col md:grid pt-14"
+        className="h-full flex flex-col md:grid pt-16"
         style={{
           gridTemplateColumns: flipped ? "38fr 62fr" : "62fr 38fr",
         }}
