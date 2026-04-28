@@ -121,6 +121,17 @@ export const artworks: Artwork[] = [
 
   // ── Generative ──────────────────────────────────────────────────────
   {
+    id: "generative_art_1",
+    title: "Lighthouse at Dusk",
+    medium: "Generative / Canvas API",
+    year: 2025,
+    category: "digital",
+    type: "generative",
+    image: "/generative/generative_art_1/",
+    description:
+      "A lighthouse rendered in the spirit of Monet — impressionist dabs of sunset colour layered over a darkening sea. The beam sweeps slowly, indifferent to the hour.",
+  },
+  {
     id: "g1",
     title: "Field",
     medium: "Generative / p5.js",
