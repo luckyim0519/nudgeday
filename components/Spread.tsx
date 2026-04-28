@@ -11,26 +11,27 @@ export default function Spread({ artwork, index, total, flipped }: Props) {
   const num = String(index + 1).padStart(2, "0");
   const tot = String(total).padStart(2, "0");
 
-  const MediaPanel = (
+  const MediaPanel = artwork.type === "generative" ? (
+    // Generative: no padding, iframe fills the full panel flush to edges
+    <div className="w-full h-full min-h-0 overflow-hidden">
+      <iframe
+        src={artwork.image}
+        title={artwork.title}
+        className="w-full h-full"
+        style={{ border: "none", display: "block" }}
+        allow="autoplay"
+      />
+    </div>
+  ) : (
     <div className="flex items-center justify-center p-8 md:p-16 min-h-0">
-      {artwork.type === "generative" ? (
-        <iframe
-          src={artwork.image}
-          title={artwork.title}
-          className="w-full h-full rounded-sm"
-          style={{ maxHeight: "calc(100dvh - 80px)", border: "none" }}
-          allow="autoplay"
-        />
-      ) : (
-        /* eslint-disable-next-line @next/next/no-img-element */
-        <img
-          src={artwork.image}
-          alt={artwork.title}
-          className="max-h-full max-w-full object-contain"
-          style={{ maxHeight: "calc(100dvh - 80px)" }}
-          loading="lazy"
-        />
-      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={artwork.image}
+        alt={artwork.title}
+        className="max-h-full max-w-full object-contain"
+        style={{ maxHeight: "calc(100dvh - 80px)" }}
+        loading="lazy"
+      />
     </div>
   );
 
