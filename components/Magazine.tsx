@@ -17,18 +17,26 @@ export default function Magazine() {
     el.scrollTo({ left: clamped * el.clientWidth, behavior: "smooth" });
   }, [total]);
 
-  // Vertical scroll / trackpad wheel → horizontal navigation
+  // Vertical scroll / trackpad wheel → one page per gesture, with cooldown
+  const lastWheel = useRef(0);
+  const currentRef = useRef(0);
+  currentRef.current = current;
+
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      // Accumulate delta and snap when threshold crossed
-      el.scrollBy({ left: e.deltaY + e.deltaX, behavior: "auto" });
+      const now = Date.now();
+      if (now - lastWheel.current < 700) return; // cooldown between page turns
+      lastWheel.current = now;
+      const delta = e.deltaY + e.deltaX;
+      if (delta > 0) scrollToPage(currentRef.current + 1);
+      if (delta < 0) scrollToPage(currentRef.current - 1);
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
-  }, []);
+  }, [scrollToPage]);
 
   // Keyboard navigation
   useEffect(() => {
