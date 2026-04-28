@@ -327,6 +327,12 @@ function resize() {
   paintStatic();
 }
 
+// Forward wheel events to parent so magazine scroll still works
+window.addEventListener("wheel", e => {
+  e.preventDefault();
+  window.parent.postMessage({ type: "wheel", deltaX: e.deltaX, deltaY: e.deltaY }, "*");
+}, { passive: false });
+
 window.addEventListener("resize", resize);
 resize();
 frame();

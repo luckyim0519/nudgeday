@@ -154,6 +154,18 @@ export default function Magazine() {
     };
   }, [snapTo, startDrift]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ─── Iframe wheel forwarding (generative art) ───────────────────────
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (e.data?.type !== "wheel") return;
+      if (snapping.current) { snapping.current = false; cancelRaf(); }
+      target.current = clamp(target.current + (e.data.deltaY + e.data.deltaX) * 0.9);
+      startDrift();
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [startDrift]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ─── Keyboard: still snaps for accessibility ─────────────────────────
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
