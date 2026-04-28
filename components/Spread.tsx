@@ -11,16 +11,26 @@ export default function Spread({ artwork, index, total, flipped }: Props) {
   const num = String(index + 1).padStart(2, "0");
   const tot = String(total).padStart(2, "0");
 
-  const ImagePanel = (
+  const MediaPanel = (
     <div className="flex items-center justify-center p-8 md:p-16 min-h-0">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={artwork.image}
-        alt={artwork.title}
-        className="max-h-full max-w-full object-contain"
-        style={{ maxHeight: "calc(100dvh - 80px)" }}
-        loading="lazy"
-      />
+      {artwork.type === "generative" ? (
+        <iframe
+          src={artwork.image}
+          title={artwork.title}
+          className="w-full h-full rounded-sm"
+          style={{ maxHeight: "calc(100dvh - 80px)", border: "none" }}
+          allow="autoplay"
+        />
+      ) : (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={artwork.image}
+          alt={artwork.title}
+          className="max-h-full max-w-full object-contain"
+          style={{ maxHeight: "calc(100dvh - 80px)" }}
+          loading="lazy"
+        />
+      )}
     </div>
   );
 
@@ -53,8 +63,6 @@ export default function Spread({ artwork, index, total, flipped }: Props) {
 
   return (
     <div className="spread bg-black">
-      {/* Content — stacked on mobile, side by side on desktop */}
-      {/* pt-16 clears the fixed global nav bar */}
       <div
         className="h-full flex flex-col md:grid pt-16"
         style={{
@@ -63,13 +71,12 @@ export default function Spread({ artwork, index, total, flipped }: Props) {
       >
         {flipped ? (
           <>
-            {/* Mobile: image on top always */}
-            <div className="flex-1 md:order-2 md:flex-none">{ImagePanel}</div>
+            <div className="flex-1 md:order-2 md:flex-none">{MediaPanel}</div>
             <div className="flex-1 md:order-1 md:flex-none">{TextPanel}</div>
           </>
         ) : (
           <>
-            <div className="flex-1 md:flex-none">{ImagePanel}</div>
+            <div className="flex-1 md:flex-none">{MediaPanel}</div>
             <div className="flex-1 md:flex-none">{TextPanel}</div>
           </>
         )}

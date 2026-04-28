@@ -1,5 +1,5 @@
 export type Category = "digital" | "painting" | "photography" | "illustration" | "mixed";
-export type ArtType  = "digital" | "static";
+export type ArtType  = "digital" | "static" | "generative";
 
 export interface Artwork {
   id: string;
@@ -117,5 +117,40 @@ export const artworks: Artwork[] = [
     image: "https://picsum.photos/seed/nd9/1000/720",
     description:
       "What is left after the subject leaves the room. This painting began as a portrait and became something else entirely — a study in what presence leaves behind.",
+  },
+
+  // ── Generative ──────────────────────────────────────────────────────
+  {
+    id: "g1",
+    title: "Field",
+    medium: "Generative / p5.js",
+    year: 2024,
+    category: "digital",
+    type: "generative",
+    image: "/generative/field/",
+    description:
+      "A flow field seeded by Perlin noise. Each particle traces a path determined entirely by its starting position — identical rules, infinite variation.",
+  },
+  {
+    id: "g2",
+    title: "Lattice",
+    medium: "Generative / WebGL",
+    year: 2024,
+    category: "digital",
+    type: "generative",
+    image: "/generative/lattice/",
+    description:
+      "A recursive grid that folds in on itself. The pattern has no fixed centre — zoom in anywhere and the structure repeats, slightly different each time.",
+  },
+  {
+    id: "g3",
+    title: "Pulse",
+    medium: "Generative / Canvas API",
+    year: 2025,
+    category: "digital",
+    type: "generative",
+    image: "/generative/pulse/",
+    description:
+      "Concentric waves driven by a sine oscillator. When two waves meet out of phase they cancel — the silence between them is as composed as the sound.",
   },
 ];

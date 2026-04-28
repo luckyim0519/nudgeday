@@ -191,6 +191,15 @@ export default function Magazine() {
           >
             Static Art
           </button>
+          <span className="text-white/15 text-xs">|</span>
+          <button
+            onClick={() => setFilter("generative")}
+            className={`text-xs tracking-[0.2em] uppercase transition-colors duration-200 font-sans ${
+              filter === "generative" ? "text-white" : "text-white/25 hover:text-white/60"
+            }`}
+          >
+            Generative
+          </button>
         </div>
 
         <span className="font-sans text-xs tracking-widest text-white/20 tabular-nums">

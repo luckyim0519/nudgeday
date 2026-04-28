@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const c = document.getElementById("c");
+const ctx = c.getContext("2d");
+let W, H;
+
+function resize() {
+  W = c.width  = window.innerWidth;
+  H = c.height = window.innerHeight;
+}
+
+let t = 0;
+function draw() {
+  ctx.fillStyle = "rgba(0,0,0,0.04)";
+  ctx.fillRect(0, 0, W, H);
+
+  const cx = W / 2, cy = H / 2;
+  const maxR = Math.min(W, H) * 0.46;
+  const rings = 28;
+
+  for (let i = 0; i < rings; i++) {
+    const phase = (i / rings) * Math.PI * 2;
+    const r = (i / rings) * maxR;
+
+    // Two interfering oscillators
+    const a1 = Math.sin(t * 1.1 + phase);
+    const a2 = Math.sin(t * 0.7 - phase * 1.3);
+    const combined = (a1 + a2) / 2; // -1 to 1, cancels at phase opposition
+
+    const alpha = Math.max(0, combined * 0.25 + 0.05);
+    const lineW = 0.4 + Math.abs(combined) * 1.2;
+
+    ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+    ctx.lineWidth = lineW;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  t += 0.012;
+  requestAnimationFrame(draw);
+}
+
+window.addEventListener("resize", resize);
+resize(); draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const c = document.getElementById("c");
+const ctx = c.getContext("2d");
+let W, H, particles = [];
+
+function resize() {
+  W = c.width  = window.innerWidth;
+  H = c.height = window.innerHeight;
+}
+
+// Simple Perlin-like noise via trig
+function noise(x, y, t) {
+  return Math.sin(x * 0.008 + t) * Math.cos(y * 0.008 + t * 0.7) +
+         Math.sin(x * 0.015 - t * 0.5) * Math.sin(y * 0.012 + t * 0.3);
+}
+
+function init() {
+  particles = [];
+  for (let i = 0; i < 600; i++) {
+    particles.push({ x: Math.random() * W, y: Math.random() * H, age: Math.random() * 200 });
+  }
+}
+
+let t = 0;
+function draw() {
+  ctx.fillStyle = "rgba(0,0,0,0.015)";
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = "rgba(255,255,255,0.35)";
+  ctx.lineWidth = 0.6;
+
+  for (const p of particles) {
+    const angle = noise(p.x, p.y, t) * Math.PI * 2;
+    const nx = p.x + Math.cos(angle) * 1.2;
+    const ny = p.y + Math.sin(angle) * 1.2;
+
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(nx, ny);
+    ctx.stroke();
+
+    p.x = nx; p.y = ny; p.age++;
+
+    if (p.age > 300 || p.x < 0 || p.x > W || p.y < 0 || p.y > H) {
+      p.x = Math.random() * W;
+      p.y = Math.random() * H;
+      p.age = 0;
+    }
+  }
+
+  t += 0.003;
+  requestAnimationFrame(draw);
+}
+
+window.addEventListener("resize", () => { resize(); init(); });
+resize(); init(); draw();
+</script>
+</body>
+</html>
