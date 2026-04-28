@@ -59,6 +59,43 @@ export default function Spread({ artwork, index, total, flipped }: Props) {
     </div>
   );
 
+  // Generative art: full-screen with floating text overlay
+  if (artwork.type === "generative") {
+    return (
+      <div className="spread bg-black relative">
+        {/* Full-screen iframe — sits behind the nav bar, pt-16 not needed since iframe handles its own sizing */}
+        <div className="absolute inset-0 pt-16">
+          <iframe
+            src={artwork.image}
+            title={artwork.title}
+            className="w-full h-full"
+            style={{ border: "none", display: "block" }}
+            allow="autoplay"
+          />
+        </div>
+
+        {/* Floating text overlay — bottom-left, gradient backdrop */}
+        <div className="absolute bottom-10 left-8 md:left-14 z-10 max-w-xs md:max-w-sm pointer-events-none">
+          {/* Gradient scrim behind text */}
+          <div className="absolute inset-0 -inset-x-4 -inset-y-4 rounded-sm bg-gradient-to-t from-black/70 via-black/40 to-transparent blur-sm" />
+
+          <div className="relative">
+            <h2 className="font-serif text-2xl md:text-3xl text-white tracking-wide mb-2 leading-tight drop-shadow-lg">
+              {artwork.title}
+            </h2>
+            <div className="w-6 h-px bg-white/40 mb-2" />
+            <p className="text-white/50 text-xs tracking-[0.2em] uppercase font-sans mb-3">
+              {artwork.medium} &nbsp;·&nbsp; {artwork.year}
+            </p>
+            <p className="text-white/70 text-sm leading-relaxed font-sans line-clamp-4 drop-shadow">
+              {artwork.description}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="spread bg-black">
       {/* pt-16 clears the fixed nav */}

@@ -321,7 +321,7 @@ function frame() {
 
 function resize() {
   W = window.innerWidth;
-  H = Math.floor(window.innerHeight * 0.5);
+  H = window.innerHeight;
   [canvas, skyBg, stBg].forEach(c => { c.width = W; c.height = H; });
   paintSky();
   paintStatic();
