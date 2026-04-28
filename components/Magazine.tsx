@@ -9,16 +9,14 @@ export default function Magazine() {
   const outerRef  = useRef<HTMLDivElement>(null);
   const innerRef  = useRef<HTMLDivElement>(null);
 
-  const pos         = useRef(0);   // current rendered x (pixels)
-  const target      = useRef(0);   // accumulated target x from wheel
+  const pos         = useRef(0);
+  const target      = useRef(0);
   const raf         = useRef<number>();
+  const snapTimer   = useRef<ReturnType<typeof setTimeout>>();
   const snapping    = useRef(false);
   const lastPage    = useRef(-1);
   const totalRef    = useRef(1);
   const touchOrigin = useRef({ x: 0, p: 0 });
-  const touchVel    = useRef(0);
-  const lastTouchX  = useRef(0);
-  const lastTouchT  = useRef(0);
 
   const [filter,  setFilter]  = useState<ArtType>("digital");
   const [current, setCurrent] = useState(0);
@@ -27,7 +25,6 @@ export default function Magazine() {
   const total    = filtered.length + 1;
   totalRef.current = total;
 
-  // ─── Helpers ────────────────────────────────────────────────────────
   const vw    = () => outerRef.current?.clientWidth ?? window.innerWidth;
   const clamp = (v: number) => Math.max(0, Math.min(v, (totalRef.current - 1) * vw()));
 
@@ -41,24 +38,7 @@ export default function Magazine() {
     if (raf.current) { cancelAnimationFrame(raf.current); raf.current = undefined; }
   };
 
-  // Drift animation loop — lerps pos toward target, no snapping
-  const startDrift = useCallback(() => {
-    if (raf.current) return;
-    const animate = () => {
-      if (snapping.current) return;
-      const d = target.current - pos.current;
-      if (Math.abs(d) < 0.1) {
-        pos.current = target.current; render(pos.current);
-        raf.current = undefined; return;
-      }
-      pos.current += d * 0.05; // ← slow drift (increase to speed up)
-      render(pos.current);
-      raf.current = requestAnimationFrame(animate);
-    };
-    raf.current = requestAnimationFrame(animate);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ─── Snap — only used by dots, keyboard, Begin button ───────────────
+  // ─── Snap to nearest page (or explicit index) ────────────────────────
   const snapTo = useCallback((pageIndex?: number) => {
     cancelRaf();
     snapping.current = true;
@@ -75,7 +55,7 @@ export default function Magazine() {
         pos.current = dest; render(dest);
         snapping.current = false; raf.current = undefined; return;
       }
-      pos.current += d * 0.1;
+      pos.current += d * 0.12;
       render(pos.current);
       raf.current = requestAnimationFrame(run);
     };
@@ -85,32 +65,51 @@ export default function Magazine() {
   // ─── Filter change → jump to cover instantly ─────────────────────────
   useEffect(() => {
     cancelRaf();
+    clearTimeout(snapTimer.current);
     pos.current = 0; target.current = 0; snapping.current = false; lastPage.current = -1;
     render(0);
   }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ─── Wheel: continuous drift, stops wherever user stops ─────────────
+  // ─── Wheel: drift while scrolling, auto-snap when user stops ─────────
   useEffect(() => {
     const el = outerRef.current;
     if (!el) return;
 
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-
-      // Break out of explicit snap if user starts scrolling again
       if (snapping.current) { snapping.current = false; cancelRaf(); }
 
-      // Accumulate target — no snap timer, just drift and stop
       target.current = clamp(target.current + (e.deltaY + e.deltaX) * 0.9);
 
-      startDrift();
+      // Auto-snap to nearest page 300ms after scrolling stops
+      clearTimeout(snapTimer.current);
+      snapTimer.current = setTimeout(() => snapTo(), 300);
+
+      // Smooth drift toward target while scrolling
+      if (!raf.current) {
+        const drift = () => {
+          if (snapping.current) return;
+          const d = target.current - pos.current;
+          if (Math.abs(d) < 0.1) {
+            pos.current = target.current; render(pos.current);
+            raf.current = undefined; return;
+          }
+          pos.current += d * 0.08;
+          render(pos.current);
+          raf.current = requestAnimationFrame(drift);
+        };
+        raf.current = requestAnimationFrame(drift);
+      }
     };
 
     el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
-  }, [snapTo, startDrift]); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      clearTimeout(snapTimer.current);
+    };
+  }, [snapTo]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ─── Touch: direct drag + momentum on release ────────────────────────
+  // ─── Touch: drag then snap to nearest page ───────────────────────────
   useEffect(() => {
     const el = outerRef.current;
     if (!el) return;
@@ -119,30 +118,16 @@ export default function Magazine() {
       cancelRaf();
       snapping.current = false;
       touchOrigin.current = { x: e.touches[0].clientX, p: pos.current };
-      lastTouchX.current  = e.touches[0].clientX;
-      lastTouchT.current  = Date.now();
-      touchVel.current    = 0;
     };
 
     const onMove = (e: TouchEvent) => {
-      const now = Date.now();
-      const dx  = lastTouchX.current - e.touches[0].clientX;
-      const dt  = now - lastTouchT.current;
-      if (dt > 0) touchVel.current = dx / dt;
-      lastTouchX.current = e.touches[0].clientX;
-      lastTouchT.current = now;
-
       const next = clamp(touchOrigin.current.p + (touchOrigin.current.x - e.touches[0].clientX));
       pos.current    = next;
       target.current = next;
       render(next);
     };
 
-    const onEnd = () => {
-      // Project forward with momentum — higher multiplier = longer coast
-      target.current = clamp(pos.current + touchVel.current * 400);
-      startDrift();
-    };
+    const onEnd = () => snapTo();
 
     el.addEventListener("touchstart", onStart, { passive: true });
     el.addEventListener("touchmove",  onMove,  { passive: true });
@@ -152,21 +137,33 @@ export default function Magazine() {
       el.removeEventListener("touchmove",  onMove);
       el.removeEventListener("touchend",   onEnd);
     };
-  }, [snapTo, startDrift]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [snapTo]);
 
-  // ─── Iframe wheel forwarding (generative art) ───────────────────────
+  // ─── Iframe wheel forwarding (generative art) ────────────────────────
   useEffect(() => {
     const onMessage = (e: MessageEvent) => {
       if (e.data?.type !== "wheel") return;
       if (snapping.current) { snapping.current = false; cancelRaf(); }
       target.current = clamp(target.current + (e.data.deltaY + e.data.deltaX) * 0.9);
-      startDrift();
+      clearTimeout(snapTimer.current);
+      snapTimer.current = setTimeout(() => snapTo(), 300);
+      if (!raf.current) {
+        const drift = () => {
+          if (snapping.current) return;
+          const d = target.current - pos.current;
+          if (Math.abs(d) < 0.1) { pos.current = target.current; render(pos.current); raf.current = undefined; return; }
+          pos.current += d * 0.08;
+          render(pos.current);
+          raf.current = requestAnimationFrame(drift);
+        };
+        raf.current = requestAnimationFrame(drift);
+      }
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [startDrift]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [snapTo]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ─── Keyboard: still snaps for accessibility ─────────────────────────
+  // ─── Keyboard ────────────────────────────────────────────────────────
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const page = Math.round(pos.current / vw());
@@ -186,32 +183,20 @@ export default function Magazine() {
         </span>
 
         <div className="flex items-center gap-6">
-          <button
-            onClick={() => setFilter("digital")}
-            className={`text-xs tracking-[0.2em] uppercase transition-colors duration-200 font-sans ${
-              filter === "digital" ? "text-white" : "text-white/25 hover:text-white/60"
-            }`}
-          >
-            Digital Art
-          </button>
-          <span className="text-white/15 text-xs">|</span>
-          <button
-            onClick={() => setFilter("static")}
-            className={`text-xs tracking-[0.2em] uppercase transition-colors duration-200 font-sans ${
-              filter === "static" ? "text-white" : "text-white/25 hover:text-white/60"
-            }`}
-          >
-            Static Art
-          </button>
-          <span className="text-white/15 text-xs">|</span>
-          <button
-            onClick={() => setFilter("generative")}
-            className={`text-xs tracking-[0.2em] uppercase transition-colors duration-200 font-sans ${
-              filter === "generative" ? "text-white" : "text-white/25 hover:text-white/60"
-            }`}
-          >
-            Generative
-          </button>
+          {(["digital", "static", "generative"] as ArtType[]).map((f, i, arr) => (
+            <>
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`text-xs tracking-[0.2em] uppercase transition-colors duration-200 font-sans ${
+                  filter === f ? "text-white" : "text-white/25 hover:text-white/60"
+                }`}
+              >
+                {f === "digital" ? "Digital Art" : f === "static" ? "Static Art" : "Generative"}
+              </button>
+              {i < arr.length - 1 && <span key={`sep-${f}`} className="text-white/15 text-xs">|</span>}
+            </>
+          ))}
         </div>
 
         <span className="font-sans text-xs tracking-widest text-white/20 tabular-nums">

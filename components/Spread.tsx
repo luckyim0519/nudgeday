@@ -9,11 +9,13 @@ interface Props {
 
 export default function Spread({ artwork, index, total, flipped }: Props) {
   const num = String(index + 1).padStart(2, "0");
-  const tot = String(total).padStart(2, "0");
+
+  const cols = artwork.type === "generative"
+    ? (flipped ? "45fr 55fr" : "55fr 45fr")
+    : (flipped ? "38fr 62fr" : "62fr 38fr");
 
   const MediaPanel = artwork.type === "generative" ? (
-    // Generative: no padding, iframe fills the full panel flush to edges
-    <div className="w-full h-full min-h-0 overflow-hidden">
+    <div className="w-full h-full overflow-hidden">
       <iframe
         src={artwork.image}
         title={artwork.title}
@@ -23,67 +25,69 @@ export default function Spread({ artwork, index, total, flipped }: Props) {
       />
     </div>
   ) : (
-    <div className="flex items-center justify-center p-8 md:p-16 min-h-0">
+    <div className="flex items-center justify-center p-6 md:p-10 w-full h-full overflow-hidden">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={artwork.image}
         alt={artwork.title}
         className="max-h-full max-w-full object-contain"
-        style={{ maxHeight: "calc(100dvh - 80px)" }}
         loading="lazy"
       />
     </div>
   );
 
   const TextPanel = (
-    <div className="flex flex-col justify-center px-6 md:px-10 py-10 border-t border-white/5 md:border-t-0 min-h-0 overflow-y-auto">
-      {/* Large faint number */}
-      <span className="font-serif text-7xl md:text-9xl leading-none text-white/5 mb-4 select-none">
+    <div className="flex flex-col justify-center px-6 md:px-10 py-6 w-full h-full overflow-hidden border-t border-white/5 md:border-t-0">
+      {/* Large background number — hidden on mobile to save space */}
+      <span className="hidden lg:block font-serif text-9xl leading-none text-white/5 mb-3 select-none shrink-0">
         {num}
       </span>
 
-      {/* Title */}
-      <h2 className="font-serif text-2xl md:text-3xl text-white tracking-wide mb-4 leading-tight">
+      <h2 className="font-serif text-xl md:text-2xl lg:text-3xl text-white tracking-wide mb-3 leading-tight shrink-0">
         {artwork.title}
       </h2>
 
-      {/* Divider */}
-      <div className="w-6 h-px bg-white/20 mb-4" />
+      <div className="w-6 h-px bg-white/20 mb-3 shrink-0" />
 
-      {/* Meta */}
-      <p className="text-white/35 text-xs tracking-[0.2em] uppercase font-sans mb-6">
+      <p className="text-white/35 text-xs tracking-[0.2em] uppercase font-sans mb-4 shrink-0">
         {artwork.medium} &nbsp;·&nbsp; {artwork.year}
       </p>
 
-      {/* Description */}
-      <p className="text-white/60 text-sm leading-relaxed font-sans max-w-sm">
+      <p className="text-white/60 text-sm leading-relaxed font-sans line-clamp-6">
         {artwork.description}
       </p>
     </div>
   );
 
-  // Generative art gets a narrower media panel so text always fits
-  const cols = artwork.type === "generative"
-    ? (flipped ? "45fr 55fr" : "55fr 45fr")
-    : (flipped ? "38fr 62fr" : "62fr 38fr");
-
   return (
     <div className="spread bg-black">
-      <div
-        className="h-full flex flex-col md:grid pt-16"
-        style={{ gridTemplateColumns: cols }}
-      >
-        {flipped ? (
-          <>
-            <div className="flex-1 md:order-2 md:flex-none">{MediaPanel}</div>
-            <div className="flex-1 md:order-1 md:flex-none">{TextPanel}</div>
-          </>
-        ) : (
-          <>
-            <div className="flex-1 md:flex-none">{MediaPanel}</div>
-            <div className="flex-1 md:flex-none">{TextPanel}</div>
-          </>
-        )}
+      {/* pt-16 clears the fixed nav */}
+      <div className="h-full pt-16">
+
+        {/* Desktop: side-by-side grid */}
+        <div
+          className="hidden md:grid h-full"
+          style={{ gridTemplateColumns: cols }}
+        >
+          {flipped ? (
+            <>
+              <div className="h-full overflow-hidden">{TextPanel}</div>
+              <div className="h-full overflow-hidden">{MediaPanel}</div>
+            </>
+          ) : (
+            <>
+              <div className="h-full overflow-hidden">{MediaPanel}</div>
+              <div className="h-full overflow-hidden">{TextPanel}</div>
+            </>
+          )}
+        </div>
+
+        {/* Mobile: image top 55%, text bottom 45% */}
+        <div className="md:hidden flex flex-col h-full">
+          <div className="h-[55%] overflow-hidden">{MediaPanel}</div>
+          <div className="h-[45%] overflow-hidden">{TextPanel}</div>
+        </div>
+
       </div>
     </div>
   );
